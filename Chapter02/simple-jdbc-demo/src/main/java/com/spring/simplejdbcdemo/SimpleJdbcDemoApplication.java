@@ -1,5 +1,6 @@
 package com.spring.simplejdbcdemo;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -12,6 +13,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import javax.sql.DataSource;
 
 @SpringBootApplication
+@Slf4j
 public class SimpleJdbcDemoApplication implements CommandLineRunner {
     /*
         平常开发中有可能需要实现在项目启动后执行的功能，
@@ -43,8 +45,8 @@ public class SimpleJdbcDemoApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        fooDao.insertData();
-//        batchFooDao.batchInsert();
+//        fooDao.insertData();
+        batchFooDao.batchInsert();
         fooDao.listData();
     }
 }
