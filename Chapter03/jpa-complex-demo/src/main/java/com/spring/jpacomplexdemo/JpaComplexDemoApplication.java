@@ -2,6 +2,7 @@ package com.spring.jpacomplexdemo;
 
 import com.spring.jpacomplexdemo.model.Coffee;
 import com.spring.jpacomplexdemo.model.CoffeeOrder;
+import com.spring.jpacomplexdemo.model.OrderState;
 import com.spring.jpacomplexdemo.repository.CoffeeOrderRepository;
 import com.spring.jpacomplexdemo.repository.CoffeeRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -38,22 +39,22 @@ public class JpaComplexDemoApplication implements CommandLineRunner {
     }
 
     private void initOrders() {
-        Coffee espresso = Coffee.builder().name("espresso")
-                .price(Money.of(CurrencyUnit.of("CNY"), 20.0))
-                .build();
-        coffeeRepository.save(espresso);
-        log.info("Coffee: {}", espresso);
-
         Coffee latte = Coffee.builder().name("latte")
                 .price(Money.of(CurrencyUnit.of("CNY"), 30.0))
                 .build();
         coffeeRepository.save(latte);
         log.info("Coffee: {}", latte);
 
+        Coffee espresso = Coffee.builder().name("espresso")
+                .price(Money.of(CurrencyUnit.of("CNY"), 20.0))
+                .build();
+        coffeeRepository.save(espresso);
+        log.info("Coffee: {}", espresso);
+
         CoffeeOrder order = CoffeeOrder.builder()
                 .customer("Li Lei")
                 .items(Collections.singletonList(espresso))
-                .state(0)
+                .state(OrderState.INIT)
                 .build();
         coffeeOrderRepository.save(order);
         log.info("Order: {}", order);
@@ -61,7 +62,7 @@ public class JpaComplexDemoApplication implements CommandLineRunner {
         order = CoffeeOrder.builder()
                 .customer("Li Lei")
                 .items(Arrays.asList(espresso, latte))
-                .state(0)
+                .state(OrderState.INIT)
                 .build();
         coffeeOrderRepository.save(order);
         log.info("Order: {}", order);
