@@ -1,7 +1,6 @@
 package com.spring.jpacomplexdemo.repository;
 
 import com.spring.jpacomplexdemo.model.Coffee;
-import org.springframework.data.repository.CrudRepository;
 
 /**
  * Created by IntelliJ IDEA.
@@ -14,5 +13,5 @@ import org.springframework.data.repository.CrudRepository;
  * @Version V1.0.0
  * @Description
  */
-public interface CoffeeRepository extends CrudRepository<Coffee, Long> {
+public interface CoffeeRepository extends BaseRepository<Coffee, Long> {
 }

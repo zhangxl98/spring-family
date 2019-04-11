@@ -1,7 +1,8 @@
 package com.spring.jpacomplexdemo.repository;
 
 import com.spring.jpacomplexdemo.model.CoffeeOrder;
-import org.springframework.data.repository.CrudRepository;
+
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -14,5 +15,7 @@ import org.springframework.data.repository.CrudRepository;
  * @Version V1.0.0
  * @Description
  */
-public interface CoffeeOrderRepository extends CrudRepository<CoffeeOrder, Long> {
+public interface CoffeeOrderRepository extends BaseRepository<CoffeeOrder, Long> {
+    List<CoffeeOrder> findByCustomerOrderById(String customer);
+    List<CoffeeOrder> findByItems_Name(String name);
 }

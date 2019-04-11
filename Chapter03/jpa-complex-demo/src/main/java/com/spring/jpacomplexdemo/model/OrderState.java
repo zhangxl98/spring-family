@@ -9,8 +9,8 @@ package com.spring.jpacomplexdemo.model;
  * @Device DELL-Inspiron-15-7559
  * @Modified By
  * @Version V1.0.0
- * @Description 用于标识 CoffeeOrder 中 order 的状态    枚举
+ * @Description 用于标识 CoffeeOrder 中 order 的状态
  */
-public enum  OrderState {
+public enum OrderState {
     INIT, PAID, BREWING, BREWED, TAKEN, CANCELLED
 }

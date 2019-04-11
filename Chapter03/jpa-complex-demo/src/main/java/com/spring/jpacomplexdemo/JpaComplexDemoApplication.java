@@ -9,33 +9,44 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import javax.transaction.Transactional;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @SpringBootApplication
 @EnableJpaRepositories
+@EnableTransactionManagement
 @Slf4j
-public class JpaComplexDemoApplication implements CommandLineRunner {
+public class JpaComplexDemoApplication implements ApplicationRunner {
+    /**
+     * <code>ApplicationRunner</code>系统启动完可以做一些业务操作
+     * 如果有多个runner需要指定一些顺序
+     */
 
     @Autowired
     private CoffeeRepository coffeeRepository;
     @Autowired
     private CoffeeOrderRepository coffeeOrderRepository;
 
-
     public static void main(String[] args) {
         SpringApplication.run(JpaComplexDemoApplication.class, args);
     }
 
     @Override
-    public void run(String... args) throws Exception {
-
+    @Transactional
+    public void run(ApplicationArguments args) throws Exception {
         initOrders();
+        findOrders();
     }
 
     private void initOrders() {
@@ -66,5 +77,31 @@ public class JpaComplexDemoApplication implements CommandLineRunner {
                 .build();
         coffeeOrderRepository.save(order);
         log.info("Order: {}", order);
+    }
+
+    private void findOrders() {
+        coffeeRepository
+                .findAll(Sort.by(Sort.Direction.DESC, "id"))
+                .forEach(c -> log.info("Loading {}", c));
+
+        List<CoffeeOrder> list = coffeeOrderRepository.findTop3ByOrderByUpdateTimeDescIdAsc();
+        log.info("findTop3ByOrderByUpdateTimeDescIdAsc: {}", getJoinedOrderId(list));
+
+        list = coffeeOrderRepository.findByCustomerOrderById("Li Lei");
+        log.info("findByCustomerOrderById: {}", getJoinedOrderId(list));
+
+        // 不开启事务会因为没Session而报LazyInitializationException
+        list.forEach(o -> {
+            log.info("Order {}", o.getId());
+            o.getItems().forEach(i -> log.info("  Item {}", i));
+        });
+
+        list = coffeeOrderRepository.findByItems_Name("latte");
+        log.info("findByItems_Name: {}", getJoinedOrderId(list));
+    }
+
+    private String getJoinedOrderId(List<CoffeeOrder> list) {
+        return list.stream().map(o -> o.getId().toString())
+                .collect(Collectors.joining(","));
     }
 }

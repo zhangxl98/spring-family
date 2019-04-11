@@ -10,6 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -35,14 +36,13 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BaseEntity {
+public class BaseEntity implements Serializable {
     @Id
     @GeneratedValue
     private Long id;
-
     @Column(updatable = false)
     @CreationTimestamp
-    private Date createDate;
+    private Date createTime;
     @UpdateTimestamp
-    private Date updateDate;
+    private Date updateTime;
 }
