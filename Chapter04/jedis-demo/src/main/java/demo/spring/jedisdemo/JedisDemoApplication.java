@@ -83,7 +83,7 @@ public class JedisDemoApplication implements ApplicationRunner {
 
             String lattePrice = jedis.hget("springbucks-menu", "latte");
 
-            log.info("lattePrice: {}", Money.of(CurrencyUnit.of("CNY"), Long.parseLong(lattePrice)));
+            log.info("lattePrice: {}", Money.ofMinor(CurrencyUnit.of("CNY"), Long.parseLong(lattePrice)));
         }
 
 
