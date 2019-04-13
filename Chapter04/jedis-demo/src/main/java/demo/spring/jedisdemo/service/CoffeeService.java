@@ -8,6 +8,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
@@ -36,5 +37,9 @@ public class CoffeeService {
 
         log.info("Coffee Find: {}", coffee);
         return coffee;
+    }
+
+    public List<Coffee> findAllCoffee(){
+        return coffeeRepository.findAll();
     }
 }
