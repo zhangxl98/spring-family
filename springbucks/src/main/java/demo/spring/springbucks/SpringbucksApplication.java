@@ -42,6 +42,33 @@ public class SpringbucksApplication implements ApplicationRunner {
 //        repositoryMethod();
 
 
+//        springCache();
+
+        redisCache();
+    }
+
+    private void redisCache() throws InterruptedException {
+        /**
+         * @Author      zhangxl98
+         * @Date        4/13/19 8:59 PM
+         * @OS          Ubuntu 18.04 LTS
+         * @Device      DELL-Inspiron-15-7559
+         * @param
+         * @return  void
+         * @Description 将从数据库中取出的数据临时存放到 redis 中
+         *
+         */
+        log.info("Count: {}", coffeeService.findAllCoffee().size());
+        for (int i = 0; i < 5; i++) {
+            log.info("Reading from cache.");
+            coffeeService.findAllCoffee();
+        }
+        Thread.sleep(5_000);
+        log.info("Reading after refresh.");
+        coffeeService.findAllCoffee().forEach(c -> log.info("Coffee {}", c.getName()));
+    }
+
+    private void springCache() {
         log.info("Count: {}", coffeeService.findAllCoffee().size());
         for (int i = 0; i < 10; i++) {
             log.info("Reading from cache.");
