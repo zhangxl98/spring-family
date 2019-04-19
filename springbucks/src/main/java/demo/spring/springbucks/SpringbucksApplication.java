@@ -1,32 +1,36 @@
 package demo.spring.springbucks;
 
-import demo.spring.springbucks.converter.BytesToMoneyConverter;
-import demo.spring.springbucks.converter.MoneyToBytesConverter;
+import demo.spring.springbucks.converter.MoneyReadConverter;
+import demo.spring.springbucks.converter.MoneyWriteConverter;
 import demo.spring.springbucks.model.Coffee;
 import demo.spring.springbucks.service.CoffeeService;
-import io.lettuce.core.ReadFrom;
+import io.r2dbc.h2.H2ConnectionConfiguration;
+import io.r2dbc.h2.H2ConnectionFactory;
+import io.r2dbc.spi.ConnectionFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.data.redis.core.convert.RedisCustomConversions;
+import org.springframework.data.convert.CustomConversions;
+import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
+import org.springframework.data.r2dbc.dialect.Dialect;
+import org.springframework.data.r2dbc.function.convert.R2dbcCustomConversions;
+import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 @SpringBootApplication
 @Slf4j
 @EnableTransactionManagement
-@EnableJpaRepositories
 @EnableRedisRepositories
-public class SpringbucksApplication implements ApplicationRunner {
+public class SpringbucksApplication extends AbstractR2dbcConfiguration {
 
     @Autowired
     private CoffeeService coffeeService;
@@ -37,36 +41,34 @@ public class SpringbucksApplication implements ApplicationRunner {
 
 
 
-    /**
-     * @param
-     * @return org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer
-     * @Author zhangxl98
-     * @Date 4/14/19 8:26 AM
-     * @OS Ubuntu 18.04 LTS
-     * @Device DELL-Inspiron-15-7559
-     * @Description <code>MASTER_PREFERRED</code>优先读主节点
-     */
     @Bean
-    public LettuceClientConfigurationBuilderCustomizer customizer() {
-        return builder -> builder.readFrom(ReadFrom.MASTER_PREFERRED);
+    public ConnectionFactory connectionFactory() {
+        return new H2ConnectionFactory(
+                H2ConnectionConfiguration.builder()
+                        .inMemory("testdb")
+                        .username("sa")
+                        .build());
     }
 
     @Bean
-    public RedisCustomConversions redisCustomConversions() {
-        return new RedisCustomConversions(Arrays.asList(new MoneyToBytesConverter(), new BytesToMoneyConverter()));
+    public R2dbcCustomConversions r2dbcCustomConversions() {
+        Dialect dialect = getDialect(connectionFactory());
+        CustomConversions.StoreConversions storeConversions =
+                CustomConversions.StoreConversions.of(dialect.getSimpleTypeHolder());
+        return new R2dbcCustomConversions(storeConversions,
+                Arrays.asList(new MoneyReadConverter(), new MoneyWriteConverter()));
     }
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
+    @Bean
+    public ReactiveRedisTemplate<String, Coffee> reactiveRedisTemplate(ReactiveRedisConnectionFactory factory) {
+        StringRedisSerializer keySerializer = new StringRedisSerializer();
+        Jackson2JsonRedisSerializer<Coffee> valueSerializer = new Jackson2JsonRedisSerializer<>(Coffee.class);
 
-        Optional<Coffee> coffee = coffeeService.findSimpleCoffeeFromCache("latte");
-        log.info("Coffee: {}", coffee);
+        RedisSerializationContext.RedisSerializationContextBuilder<String, Coffee> builder
+                = RedisSerializationContext.newSerializationContext(keySerializer);
 
-        for (int i = 0; i < 5; i++) {
-            coffee = coffeeService.findSimpleCoffeeFromCache("latte");
-        }
+        RedisSerializationContext<String, Coffee> context = builder.value(valueSerializer).build();
 
-        log.info("Value from Redis: {}", coffee);
-
+        return new ReactiveRedisTemplate<>(factory, context);
     }
 }

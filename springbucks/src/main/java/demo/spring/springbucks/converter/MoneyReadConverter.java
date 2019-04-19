@@ -5,24 +5,21 @@ import org.joda.money.Money;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 
-import java.nio.charset.StandardCharsets;
-
 /**
  * Created by IntelliJ IDEA.
  *
  * @Author zhangxl98
- * @Date 4/14/19 9:01 AM
+ * @Date 4/19/19 4:22 PM
  * @OS Ubuntu 18.04 LTS
  * @Device DELL-Inspiron-15-7559
  * @Modified By
  * @Version V1.0.0
- * @Description 类型转换
+ * @Description
  */
 @ReadingConverter
-public class BytesToMoneyConverter implements Converter<byte[], Money> {
-
+public class MoneyReadConverter implements Converter<Long, Money> {
     @Override
-    public Money convert(byte[] bytes) {
-        return Money.of(CurrencyUnit.of("CNY"), Long.parseLong(new String(bytes, StandardCharsets.UTF_8)));
+    public Money convert(Long aLong) {
+        return Money.ofMinor(CurrencyUnit.of("CNY"), aLong);
     }
 }

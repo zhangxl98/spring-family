@@ -2,8 +2,8 @@ package demo.spring.springbucks.model;
 
 import lombok.*;
 
-import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,20 +17,15 @@ import java.util.List;
  * @Version V1.0.0
  * @Description CoffeeOrder 实体类
  */
-@Entity
-@Table(name = "T_ORDER")
 @Data
-@ToString(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CoffeeOrder extends BaseEntity implements Serializable {
+public class CoffeeOrder implements Serializable {
+    private Long id;
     private String customer;
-    @ManyToMany
-    @JoinTable(name = "T_ORDER_COFFEE")
-    @OrderBy("id")
-    private List<Coffee> items;
-    @Enumerated
-    @Column(nullable = false)
     private OrderState state;
+    private List<Coffee> items;
+    private Date createTime;
+    private Date updateTime;
 }

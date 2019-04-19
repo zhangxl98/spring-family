@@ -1,16 +1,13 @@
 package demo.spring.springbucks.service;
 
-import demo.spring.springbucks.model.Coffee;
 import demo.spring.springbucks.model.CoffeeOrder;
-import demo.spring.springbucks.model.OrderState;
 import demo.spring.springbucks.repository.CoffeeOrderRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.r2dbc.function.DatabaseClient;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
-import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Created by IntelliJ IDEA.
@@ -25,27 +22,14 @@ import java.util.Arrays;
  */
 @Service
 @Slf4j
-@Transactional
 public class CoffeeOrderService {
 
     @Autowired
-    private CoffeeOrderRepository coffeeOrderRepository;
+    private CoffeeOrderRepository repository;
+    @Autowired
+    private DatabaseClient client;
 
-    public CoffeeOrder createOrder(String customer, Coffee... coffees) {
-        CoffeeOrder coffeeOrder = CoffeeOrder.builder().customer(customer).items(new ArrayList<>(Arrays.asList(coffees))).state(OrderState.INIT).build();
-        CoffeeOrder save = coffeeOrderRepository.save(coffeeOrder);
-        log.info("New Order: {}", save);
-        return save;
-    }
-
-    public boolean updateState(CoffeeOrder order, OrderState state) {
-        if (state.compareTo(order.getState()) <= 0) {
-            log.warn("Wrong State order: {}, {}", state, order.getState());
-            return false;
-        }
-        order.setState(state);
-        coffeeOrderRepository.save(order);
-        log.info("Updated Order: {}", order);
-        return true;
+    public Mono<Long> create(CoffeeOrder order) {
+        return repository.save(order);
     }
 }

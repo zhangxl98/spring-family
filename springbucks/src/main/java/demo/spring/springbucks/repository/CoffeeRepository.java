@@ -1,7 +1,9 @@
 package demo.spring.springbucks.repository;
 
 import demo.spring.springbucks.model.Coffee;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import org.springframework.data.r2dbc.repository.query.Query;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by IntelliJ IDEA.
@@ -14,5 +16,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @Version V1.0.0
  * @Description
  */
-public interface CoffeeRepository extends JpaRepository<Coffee, Long> {
+public interface CoffeeRepository extends R2dbcRepository<Coffee, Long> {
+    @Query("select * from t_coffee where name=$1")
+    Mono<Coffee> findByName(String name);
 }
